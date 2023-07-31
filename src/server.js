@@ -1,29 +1,32 @@
 require("express-async-errors")
 
 const migrationsRun = require("./database/sqlite")
-const express = require("express")
+const updloadConfig = require("./configs/upload")
 const AppError = require("./utils/AppError")
 const routes = require("./routes")
+const express = require("express")
 
 const app = express()
 app.use(express.json())
+
+app.use("/files", express.static(updloadConfig.UPLOADS_FOLDER))
 
 app.use(routes)
 migrationsRun()
 
 app.use((error, request, response, next) => {
-  if(error instanceof AppError){
+  if (error instanceof AppError) {
     return response.status(error.statusCode).json({
       status: "error",
-      message: error.message
-    })   
+      message: error.message,
+    })
   }
 
   console.log(error)
 
   return response.status(500).json({
     status: "error",
-    message: "Internal server error!"
+    message: "Internal server error!",
   })
 })
 
